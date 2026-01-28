@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devocional Diário</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --vermelho-cal: #e74c3c;
+            --dourado: #b8860b;
+            --bg: #f4f7f6;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; }
+
+        /* Container do Calendário e Título */
+        .hoje-container {
+            display: flex; align-items: center; gap: 15px; width: 95%; max-width: 600px;
+            margin: 40px 0 20px 0; background: white; padding: 15px; border-radius: 12px;
+            box-shadow: var(--shadow); box-sizing: border-box;
+        }
+
+        .calendario-icone {
+            width: 75px; height: 90px; background: white; border-radius: 10px;
+            overflow: hidden; border: 1px solid #ddd; text-align: center; flex-shrink: 0;
+        }
+        .cal-mes { background: var(--vermelho-cal); color: white; font-size: 0.7rem; font-weight: bold; padding: 5px 0; text-transform: uppercase; }
+        .cal-dia { font-size: 2rem; font-weight: 700; color: #333; line-height: 1.2; }
+        .cal-semana { font-size: 0.65rem; color: #888; text-transform: uppercase; }
+
+        .titulo-grupo { 
+         flex-grow: 1; 
+         display: flex;
+         flex-direction: column;
+         justify-content: center; /* Centraliza o título verticalmente ao lado do calendário */
+         overflow: hidden; 
+}
+
+        
+        .header-title { 
+          margin: 0; 
+         color: var(--dourado); 
+         font-weight: 700;
+         font-size: 1.3rem;
+         line-height: 1.2;
+         display: -webkit-box;
+        -webkit-line-clamp: 2; /* Limita a EXATAMENTE 2 linhas */
+        -webkit-box-orient: vertical;
+         overflow: hidden;
+         text-overflow: ellipsis;
+        white-space: normal; /* Permite a quebra de linha */
+}
+
+        /* Conteúdo Principal */
+        .content-box { width: 95%; max-width: 600px; background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow); margin-bottom: 20px; box-sizing: border-box; }
+        .meta-info { font-style: italic; color: #555; margin-bottom: 20px; border-left: 4px solid var(--dourado); padding-left: 15px; }
+        .texto-corpo { line-height: 1.8; font-size: 1.05rem; color: #444; white-space: pre-wrap; }
+        .texto-corpo strong { color: #2c3e50; }
+
+        /* Caixa de Oração Amarela */
+        .box-oracao {
+            background-color: #fef9e7;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            border: 1px solid #f9e79f;
+            display: none; /* Só aparece se houver oração */
+        }
+        .box-oracao h3 { margin: 0 0 10px 0; color: var(--dourado); font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        .texto-oracao { font-style: italic; color: #5d4037; line-height: 1.6; }
+
+        /* Botão Final */
+        .btn-cta {
+            display: block; width: 95%; max-width: 600px; background-color: #27ae60;
+            color: white; text-align: center; padding: 18px 0; text-decoration: none;
+            font-weight: bold; border-radius: 12px; margin-bottom: 50px;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hoje-container">
+        <div class="calendario-icone">
+            <div class="cal-mes" id="cal-mes">---</div>
+            <div class="cal-dia" id="cal-dia">00</div>
+            <div class="cal-semana" id="cal-semana">---</div>
+        </div>
+        <div class="titulo-grupo">
+            <h2 id="titulo" class="header-title">Carregando título...</h2>
+        </div>
+    </div>
+
+    <div class="content-box">
+        <div class="meta-info">
+            <span id="referencia"></span><br>
+            <strong><span id="versiculo"></span></strong>
+        </div>
+        <div id="texto" class="texto-corpo"></div>
+
+        <div class="box-oracao" id="box-oracao">
+            <h3>🙏 Para Orar</h3>
+            <div id="para-orar" class="texto-oracao"></div>
+        </div>
+    </div>
+
+    <a href="https://projeto-app-convite.vercel.app/" class="btn-cta">Baixe o APP Completo com Plano de Leitura e Devocional</a>
+
+    <script>
+        // Lógica para contar devocionais (Segunda a Sexta)
+        function getDevocionalNumber() {
+            const inicio = new Date(2026, 0, 5);
+            const hoje = new Date();
+            let count = 0;
+            let d = new Date(inicio);
+            while (d <= hoje) {
+                if (d.getDay() !== 0 && d.getDay() !== 6) count++;
+                d.setDate(d.getDate() + 1);
+            }
+            return count.toString().padStart(3, '0');
+        }
+
+        async function carregar() {
+            const agora = new Date();
+            const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const dias = ["DOMINGO", "SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA", "SÁBADO"];
+
+            document.getElementById('cal-mes').innerText = meses[agora.getMonth()];
+            document.getElementById('cal-dia').innerText = agora.getDate();
+            document.getElementById('cal-semana').innerText = dias[agora.getDay()];
+
+            const num = getDevocionalNumber();
+            const url = `https://raw.githubusercontent.com/sidinyjunior/plano-leitura/main/Devocional_Diario/devocional_${num}.json`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+
+                document.getElementById('titulo').innerText = data.titulo;
+                document.getElementById('referencia').innerText = data.referencia;
+                document.getElementById('versiculo').innerText = data.versiculo;
+
+                let textoCompleto = data.texto;
+                let textoPrincipal = "";
+                let oracaoExtraida = "";
+
+                // Separa a oração se o marcador "**Para Orar:**" estiver presente
+                if (textoCompleto.includes("**Para Orar:**")) {
+                    const partes = textoCompleto.split("**Para Orar:**");
+                    textoPrincipal = partes[0].trim();
+                    oracaoExtraida = partes[1].trim();
+                } else {
+                    textoPrincipal = textoCompleto;
+                }
+
+                document.getElementById('texto').innerHTML = textoPrincipal
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br>');
+
+                if (oracaoExtraida) {
+                    document.getElementById('para-orar').innerText = oracaoExtraida;
+                    document.getElementById('box-oracao').style.display = 'block';
+                }
+
+            } catch (e) {
+                document.getElementById('titulo').innerText = "Devocional indisponível";
+            }
+        }
+        window.onload = carregar;
+    </script>
+</body>
+</html>
